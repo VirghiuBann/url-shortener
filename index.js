@@ -29,25 +29,28 @@ app.post('/api/shorturl', async (req, res) => {
   const url = req.body.url; 
 
   try {
+    const urlCount = await UrlShort.countDocuments({});
     const urlValid = await validateUrl(url);    
-    const urlObj = { original_url: urlValid.origin, short_url: urlShortMemo.length + 1 }
-    urlShortMemo.push(urlObj);
-    res.json(urlObj);
+    const urlObj = new UrlShort({ original_url: urlValid.origin, short_url: urlCount + 1 });
+    await urlObj.save();
+    
+    res.json({original_url: urlObj.original_url, short_url: urlObj.short_url});
   } catch (error) {
     res.json({ error: 'invalid url' });
   }
 
 });
 
-app.get('/api/shorturl/:short_url', (req, res) => {
+app.get('/api/shorturl/:short_url', async (req, res) => {
   const shortUrl = parseInt(req.params.short_url);
 
-  const urlObj = urlShortMemo.find((item) => item.short_url === shortUrl);
-
-  if (!urlObj) {
+  try {
+    const urlObj = await UrlShort.find({short_url: shortUrl});
+    res.redirect(urlObj.original_url);
+    
+  } catch (error) {
     return res.json({ error: 'invalid url' });
-  }
-  res.redirect(urlObj.original_url);
+      }
 
 });
 
