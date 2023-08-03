@@ -1,9 +1,14 @@
 require('dotenv').config();
 const express = require('express');
+const mongoose = require("mongoose");
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const dns = require('dns').promises;
 
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+
+const UrlShort = require('./model/urlShort');
+ 
 const urlShortMemo = [];
 
 const app = express();
